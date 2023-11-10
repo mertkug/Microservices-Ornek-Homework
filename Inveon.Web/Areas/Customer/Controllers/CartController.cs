@@ -36,7 +36,7 @@ namespace Inveon.Web.Areas.Customer.Controllers
             {
                 return RedirectToAction(nameof(CartIndex));
             }
-            return View();
+            return NoContent();
         }
 
         [HttpPost]
@@ -51,7 +51,7 @@ namespace Inveon.Web.Areas.Customer.Controllers
             {
                 return RedirectToAction(nameof(CartIndex));
             }
-            return View();
+            return NoContent();
         }
 
         public async Task<IActionResult> Remove(int cartDetailsId)
@@ -65,7 +65,7 @@ namespace Inveon.Web.Areas.Customer.Controllers
             {
                 return RedirectToAction(nameof(CartIndex));
             }
-            return View();
+            return NoContent();
         }
 
 

@@ -1,4 +1,5 @@
-﻿using Inveon.Services.ShoppingCartAPI.Messages;
+﻿using System.Globalization;
+using Inveon.Services.ShoppingCartAPI.Messages;
 using Inveon.Services.ShoppingCartAPI.Models.Dto;
 using Inveon.Services.ShoppingCartAPI.RabbitMQ;
 using Inveon.Services.ShoppingCartAPI.Repository;
@@ -6,7 +7,6 @@ using Iyzipay;
 using Iyzipay.Model;
 using Iyzipay.Request;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Inveon.Services.ShoppingCartAPI.Controllers
@@ -34,11 +34,8 @@ namespace Inveon.Services.ShoppingCartAPI.Controllers
         [HttpPost]
         [Authorize]
         public async Task<object> Checkout([FromBody] CheckoutHeaderDto checkoutHeader)
-
-
-
-
         {
+            var discount = 0.0;
             try
             {
                 CartDto cartDto = await _cartRepository.GetCartByUserId(checkoutHeader.UserId);
@@ -80,103 +77,113 @@ namespace Inveon.Services.ShoppingCartAPI.Controllers
         public Payment OdemeIslemi(CheckoutHeaderDto checkoutHeaderDto)
         {
 
-            CartDto cartDto = _cartRepository.GetCartByUserIdNonAsync(checkoutHeaderDto.UserId);
+            var cartDto = _cartRepository.GetCartByUserIdNonAsync(checkoutHeaderDto.UserId);
 
-            Options options = new Options();
+            var options = new Options
+            {
+                ApiKey = "sandbox-wXcRDfJDJXGow4mDnmD8JshX3atJu3Y4",
+                SecretKey = "sandbox-zJ9dLZZrgIiHhtFlHBWESJit7YYfijNk",
+                BaseUrl = "https://sandbox-api.iyzipay.com"
+            };
 
-            options.ApiKey = "sandbox-8zkTEIzQ8rikWsvPkL76V8kAvo4DpYuz";
-            options.SecretKey = "sandbox-56FjiYYrjkAuSqENtt0k8b7Ei03s8X61";
-            options.BaseUrl = "https://sandbox-api.iyzipay.com";
-
-            CreatePaymentRequest request = new CreatePaymentRequest();
-            request.Locale = Locale.TR.ToString();
-            request.ConversationId = new Random().Next(1111, 9999).ToString();
-            request.Price = "1";
-            request.PaidPrice = "1.2";
-            //request.Price = "15";//checkoutHeaderDto.OrderTotal.ToString();
-            //request.PaidPrice = "15";//checkoutHeaderDto.OrderTotal.ToString();
-            request.Currency = Currency.TRY.ToString();
-            request.Installment = 1;
-            request.BasketId = "B67832";
+            var request = new CreatePaymentRequest
+            {
+                Locale = Locale.TR.ToString(),
+                ConversationId = new Random().Next(1111, 9999).ToString(),
+                PaidPrice = "1.2",
+                //request.Price = "15";//checkoutHeaderDto.OrderTotal.ToString();
+                //request.PaidPrice = "15";//checkoutHeaderDto.OrderTotal.ToString();
+                Currency = Currency.TRY.ToString(),
+                Installment = 1,
+                BasketId = "B67832"
+            };
             request.BasketId = checkoutHeaderDto.CartHeaderId.ToString();
             request.PaymentChannel = PaymentChannel.WEB.ToString();
             request.PaymentGroup = PaymentGroup.PRODUCT.ToString();
 
-            PaymentCard paymentCard = new PaymentCard();
-            paymentCard.CardHolderName = checkoutHeaderDto.CartHeaderId.ToString();
-            paymentCard.CardNumber = checkoutHeaderDto.CardNumber;
-            paymentCard.ExpireMonth = checkoutHeaderDto.ExpiryMonth;
-            paymentCard.ExpireYear = checkoutHeaderDto.ExpiryYear;
-            paymentCard.Cvc = checkoutHeaderDto.CVV;
-            paymentCard.RegisterCard = 0;
-            paymentCard.CardAlias = "Inveon";
+            var paymentCard = new PaymentCard
+            {
+                CardHolderName = checkoutHeaderDto.CartHeaderId.ToString(),
+                CardNumber = checkoutHeaderDto.CardNumber,
+                ExpireMonth = checkoutHeaderDto.ExpiryMonth,
+                ExpireYear = checkoutHeaderDto.ExpiryYear,
+                Cvc = checkoutHeaderDto.CVV,
+                RegisterCard = 0,
+                CardAlias = "Inveon"
+            };
             request.PaymentCard = paymentCard;
 
-            Buyer buyer = new Buyer();
-            //buyer.Id = cartDto.CartHeader.UserId;
-            buyer.Id = "BY789";
-            buyer.Name = checkoutHeaderDto.FirstName;
-            buyer.Surname = checkoutHeaderDto.FirstName;
-            buyer.GsmNumber = checkoutHeaderDto.Phone;
-            buyer.Email = checkoutHeaderDto.Email;
-            buyer.IdentityNumber = "74300864791";
-            buyer.LastLoginDate = "2015-10-05 12:43:35";
-            buyer.RegistrationDate = "2013-04-21 15:12:09";
-            buyer.RegistrationAddress = "Nidakule Göztepe, Merdivenköy Mah. Bora Sok. No:1";
-            buyer.Ip = "85.34.78.112";
-            buyer.City = "Istanbul";
-            buyer.Country = "Turkey";
-            buyer.ZipCode = "34732";
+            var buyer = new Buyer
+            {
+                //buyer.Id = cartDto.CartHeader.UserId;
+                Id = "BY789",
+                Name = checkoutHeaderDto.FirstName,
+                Surname = checkoutHeaderDto.LastName,
+                GsmNumber = checkoutHeaderDto.Phone,
+                Email = checkoutHeaderDto.Email,
+                IdentityNumber = "74300864791",
+                LastLoginDate = "2015-10-05 12:43:35",
+                RegistrationDate = "2013-04-21 15:12:09",
+                RegistrationAddress = "Nidakule Göztepe, Merdivenköy Mah. Bora Sok. No:1",
+                Ip = "85.34.78.112",
+                City = "Istanbul",
+                Country = "Turkey",
+                ZipCode = "34732"
+            };
             request.Buyer = buyer;
 
-            Address shippingAddress = new Address();
-            shippingAddress.ContactName = "Jane Doe";
-            shippingAddress.City = "Istanbul";
-            shippingAddress.Country = "Turkey";
-            shippingAddress.Description = "Nidakule Göztepe, Merdivenköy Mah. Bora Sok. No:1";
-            shippingAddress.ZipCode = "34742";
+            var shippingAddress = new Address
+            {
+                ContactName = $"{checkoutHeaderDto.FirstName} {checkoutHeaderDto.LastName}",
+                City = "Istanbul",
+                Country = "Turkey",
+                Description = "Nidakule Göztepe, Merdivenköy Mah. Bora Sok. No:1",
+                ZipCode = "34742"
+            };
             request.ShippingAddress = shippingAddress;
 
-            Address billingAddress = new Address();
-            billingAddress.ContactName = "Jane Doe";
-            billingAddress.City = "Istanbul";
-            billingAddress.Country = "Turkey";
-            billingAddress.Description = "Nidakule Göztepe, Merdivenköy Mah. Bora Sok. No:1";
-            billingAddress.ZipCode = "34742";
+            var billingAddress = new Address
+            {
+                ContactName = $"{checkoutHeaderDto.FirstName} {checkoutHeaderDto.LastName}",
+                City = "Istanbul",
+                Country = "Turkey",
+                Description = "Nidakule Göztepe, Merdivenköy Mah. Bora Sok. No:1",
+                ZipCode = "34742"
+            };
             request.BillingAddress = billingAddress;
 
-            List<BasketItem> basketItems = new List<BasketItem>();
-            BasketItem firstBasketItem = new BasketItem();
-            firstBasketItem.Id = "BI101";
-            firstBasketItem.Name = "Binocular";
-            firstBasketItem.Category1 = "Collectibles";
-            firstBasketItem.Category2 = "Accessories";
-            firstBasketItem.ItemType = BasketItemType.PHYSICAL.ToString();
-            firstBasketItem.Price = "0.3";
-            basketItems.Add(firstBasketItem);
+            var basketItems = new List<BasketItem>();
+            
+            var us = new CultureInfo("en-US");
+            var numberFormat = us.NumberFormat;
+            var decimalSeparator = numberFormat.NumberDecimalSeparator;
+            var basket = checkoutHeaderDto.CartDetails;
+            var totalPrice = 0.0M;
+            foreach (var cartDetails in basket)
+            {
+                var product = cartDetails.Product;
+                var item = new BasketItem();
+                item.Id = $"B11{product.ProductId.ToString()}";
+                item.Name = product.Name;
+                item.Category1 = product.CategoryName;
+                item.ItemType = BasketItemType.PHYSICAL.ToString();
+                item.Price = (product.Price * cartDetails.Count).ToString("F2", CultureInfo.InvariantCulture);
+                basketItems.Add(item);
+                request.BasketItems = basketItems;
+                Console.WriteLine(item.Price);
+            }
+            Console.WriteLine(totalPrice);
 
-            BasketItem secondBasketItem = new BasketItem();
-            secondBasketItem.Id = "BI102";
-            secondBasketItem.Name = "Game code";
-            secondBasketItem.Category1 = "Game";
-            secondBasketItem.Category2 = "Online Game Items";
-            secondBasketItem.ItemType = BasketItemType.VIRTUAL.ToString();
-            secondBasketItem.Price = "0.5";
-            basketItems.Add(secondBasketItem);
+            totalPrice = basketItems.Sum(x => Convert.ToDecimal(x.Price, CultureInfo.InvariantCulture));
 
-            BasketItem thirdBasketItem = new BasketItem();
-            thirdBasketItem.Id = "BI103";
-            thirdBasketItem.Name = "Usb";
-            thirdBasketItem.Category1 = "Electronics";
-            thirdBasketItem.Category2 = "Usb / Cable";
-            thirdBasketItem.ItemType = BasketItemType.PHYSICAL.ToString();
-            thirdBasketItem.Price = "0.2";
-            basketItems.Add(thirdBasketItem);
-            request.BasketItems = basketItems;
-
-            //Payment payment = Payment.Create(request, options);
-
-            return Payment.Create(request, options);
+            
+            request.Price = totalPrice.ToString(CultureInfo.InvariantCulture);
+            request.PaidPrice = checkoutHeaderDto.OrderTotal.ToString(CultureInfo.InvariantCulture);
+            var payment = Payment.Create(request, options);
+            Console.WriteLine(request.PaidPrice);
+            Console.WriteLine(request.Price);
+            Console.WriteLine(payment.ErrorMessage);
+            return payment;
         }
     }
 }

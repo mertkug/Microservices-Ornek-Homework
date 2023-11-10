@@ -4,6 +4,7 @@ using Inveon.Services.CouponAPI.DbContexts;
 using Inveon.Services.CouponAPI.Repository;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -29,7 +30,7 @@ builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
 
-        options.Authority = "https://localhost:44365/";
+        options.Authority = "https://localhost:5021/";
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = false
@@ -80,6 +81,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+IdentityModelEventSource.ShowPII = true;
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
