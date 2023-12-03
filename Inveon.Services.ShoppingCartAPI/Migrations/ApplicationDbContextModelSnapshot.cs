@@ -68,6 +68,45 @@ namespace Inveon.Services.ShoppingCartAPI.Migrations
                     b.ToTable("CartHeaders");
                 });
 
+            modelBuilder.Entity("Inveon.Services.ShoppingCartAPI.Models.Colour", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Img")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Colours", (string)null);
+                });
+
+            modelBuilder.Entity("Inveon.Services.ShoppingCartAPI.Models.Label", b =>
+                {
+                    b.Property<int>("LabelId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("LabelId");
+
+                    b.ToTable("Labels");
+                });
+
             modelBuilder.Entity("Inveon.Services.ShoppingCartAPI.Models.Product", b =>
                 {
                     b.Property<int>("ProductId")
@@ -78,6 +117,10 @@ namespace Inveon.Services.ShoppingCartAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HoverImageUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -94,7 +137,41 @@ namespace Inveon.Services.ShoppingCartAPI.Migrations
 
                     b.HasKey("ProductId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
+                });
+
+            modelBuilder.Entity("Inveon.Services.ShoppingCartAPI.Models.Rating", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Rate")
+                        .HasColumnType("float");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Ratings", (string)null);
+                });
+
+            modelBuilder.Entity("LabelProduct", b =>
+                {
+                    b.Property<int>("LabelsLabelId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductsProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("LabelsLabelId", "ProductsProductId");
+
+                    b.HasIndex("ProductsProductId");
+
+                    b.ToTable("LabelProduct");
                 });
 
             modelBuilder.Entity("Inveon.Services.ShoppingCartAPI.Models.CartDetails", b =>
@@ -114,6 +191,51 @@ namespace Inveon.Services.ShoppingCartAPI.Migrations
                     b.Navigation("CartHeader");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Inveon.Services.ShoppingCartAPI.Models.Colour", b =>
+                {
+                    b.HasOne("Inveon.Services.ShoppingCartAPI.Models.Product", "Product")
+                        .WithMany("Colours")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("Inveon.Services.ShoppingCartAPI.Models.Rating", b =>
+                {
+                    b.HasOne("Inveon.Services.ShoppingCartAPI.Models.Product", "Product")
+                        .WithOne("Rating")
+                        .HasForeignKey("Inveon.Services.ShoppingCartAPI.Models.Rating", "Id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("LabelProduct", b =>
+                {
+                    b.HasOne("Inveon.Services.ShoppingCartAPI.Models.Label", null)
+                        .WithMany()
+                        .HasForeignKey("LabelsLabelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Inveon.Services.ShoppingCartAPI.Models.Product", null)
+                        .WithMany()
+                        .HasForeignKey("ProductsProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Inveon.Services.ShoppingCartAPI.Models.Product", b =>
+                {
+                    b.Navigation("Colours");
+
+                    b.Navigation("Rating")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

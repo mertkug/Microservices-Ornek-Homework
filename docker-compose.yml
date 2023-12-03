@@ -1,0 +1,24 @@
+﻿version: "3.4"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Inveon.Services.ProductAPI/Dockerfile
+    environment:
+      - ASPNETCORE_URLS=https://+:443  # Specify the HTTPS URL
+      - ASPNETCORE_HTTPS_PORT=443  # Set the HTTPS port
+    ports:
+      - "5030:8080"
+      - "5031:443"
+    depends_on:
+      - db
+
+  db:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    ports:
+      - "1469:1469"
+    
+    environment:
+      SA_PASSWORD: "mertt1234R??"
+      ACCEPT_EULA: "Y"

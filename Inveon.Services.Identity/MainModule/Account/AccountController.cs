@@ -174,7 +174,7 @@ namespace IdentityServerHost.Quickstart.UI
                 return await Logout(vm);
             }
 
-            return View(vm);
+            return Redirect("http://localhost:3000");
         }
 
         /// <summary>
@@ -207,8 +207,9 @@ namespace IdentityServerHost.Quickstart.UI
                 // this triggers a redirect to the external provider for sign-out
                 return SignOut(new AuthenticationProperties { RedirectUri = url }, vm.ExternalAuthenticationScheme);
             }
-            return Redirect(vm.PostLogoutRedirectUri);
-           // return View("LoggedOut", vm);
+            // return Redirect("https://localhost:5001/signout-callback-oidc");
+            //return Redirect(vm.PostLogoutRedirectUri);
+            return Redirect("http://localhost:3000");
         }
 
         [HttpGet]

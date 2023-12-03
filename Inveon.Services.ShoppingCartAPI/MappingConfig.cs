@@ -14,6 +14,9 @@ namespace Inveon.Services.ShoppingCartAPI
                 config.CreateMap<CartHeader, CartHeaderDto>().ReverseMap();
                 config.CreateMap<CartDetails, CartDetailsDto>().ReverseMap();
                 config.CreateMap<Cart, CartDto>().ReverseMap();
+                config.CreateMap<Label, LabelDto>().ReverseMap();
+                config.CreateMap<Colour, ColourDto>().ReverseMap();
+                config.CreateMap<Rating, RatingDto>().ReverseMap();
             });
 
             return mappingConfig;

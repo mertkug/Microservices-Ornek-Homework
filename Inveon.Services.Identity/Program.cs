@@ -22,6 +22,16 @@ namespace Inveon.Services.Identity
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
+
+            builder.Services.AddSingleton<ICorsPolicyService>((container) =>
+            {
+                var logger = container.GetRequiredService<ILogger<DefaultCorsPolicyService>>();
+
+                return new DefaultCorsPolicyService(logger) 
+                {
+                    AllowedOrigins = { "http://localhost:3000" },
+                };
+            });
             var builderProvider = builder.Services.AddIdentityServer(options =>
             {
                 options.Events.RaiseErrorEvents = true;

@@ -10,5 +10,7 @@ namespace Inveon.Services.ProductAPI.Repository
         Task<ProductDto> GetProductById(int productId);
         Task<ProductDto> CreateUpdateProduct(ProductDto productDto);
         Task<bool> DeleteProduct(int productId);
+
+        Task<IEnumerable<ProductDto>> GetProductsByLabel(string labelName);
     }
 }

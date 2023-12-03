@@ -12,6 +12,15 @@ namespace Inveon.Services.ProductAPI
             {
                 config.CreateMap<ProductDto, Product>();
                 config.CreateMap<Product, ProductDto>();
+                
+                config.CreateMap<RatingDto, Rating>();
+                config.CreateMap<Rating, RatingDto>();
+                
+                config.CreateMap<ColourDto, Colour>();
+                config.CreateMap<Colour, ColourDto>();
+                
+                // config.CreateMap<LabelProductDto, LabelProduct>();
+                // config.CreateMap<LabelProduct, LabelProductDto>();
             });
 
             return mappingConfig;

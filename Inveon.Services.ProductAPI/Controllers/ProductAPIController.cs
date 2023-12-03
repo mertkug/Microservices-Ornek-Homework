@@ -47,10 +47,27 @@ namespace Inveon.Services.ProductAPI.Controllers
                 _response.IsSuccess = false;
                 _response.ErrorMessages
                      = new List<string>() { ex.ToString() };
+                return NotFound(_response);
             }
             return _response;
         }
-
+        
+        [HttpGet("filtered")]
+        public async Task<object> GetByLabel([FromQuery] string label)
+        {
+            try
+            {
+                var productDtos = await _productRepository.GetProductsByLabel(label);
+                _response.Result = productDtos;
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.ErrorMessages
+                    = new List<string>() { ex.ToString() };
+            }
+            return _response;
+        }
 
         [HttpPost]
         [Authorize]

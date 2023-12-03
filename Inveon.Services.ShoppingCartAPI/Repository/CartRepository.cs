@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Linq.Expressions;
+using AutoMapper;
 using Inveon.Services.ShoppingCartAPI.Models.Dto;
 using Inveon.Services.ShoppingCartAPI.Models;
 using Inveon.Services.ShoppingCartAPI.DbContexts;
@@ -45,6 +46,7 @@ namespace Inveon.Services.ShoppingCartAPI.Repository
         {
 
             Cart cart = _mapper.Map<Cart>(cartDto);
+
             // cart.CartHeader.CouponCode = "yok";
             //check if product exists in database, if not create it!
             var prodInDb = await _db.Products
@@ -111,8 +113,13 @@ namespace Inveon.Services.ShoppingCartAPI.Repository
                 CartHeader = await _db.CartHeaders.FirstOrDefaultAsync(u => u.UserId == userId)
             };
 
-            cart.CartDetails = _db.CartDetails
-                .Where(u => u.CartHeaderId == cart.CartHeader.CartHeaderId).Include(u => u.Product);
+            // Query for CartDetails separately
+            var cartDetails = _db.CartDetails
+                .Where(u => cart.CartHeader != null && u.CartHeaderId == cart.CartHeader.CartHeaderId)
+                .Include(u => u.Product)
+                .ToList(); // Materialize the query
+
+            cart.CartDetails = cartDetails;
 
             return _mapper.Map<CartDto>(cart);
         }
@@ -167,4 +174,9 @@ namespace Inveon.Services.ShoppingCartAPI.Repository
             }
         }
     }
+}
+
+internal static class Helpers
+{
+    //
 }

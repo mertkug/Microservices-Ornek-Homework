@@ -8,5 +8,10 @@
         public string Description { get; set; }
         public string CategoryName { get; set; }
         public string ImageUrl { get; set; }
+        
+        public string HoverImageUrl { get; set; }
+        public ICollection<LabelDto> Labels { get; set; }
+        public RatingDto Rating { get; set; }
+        public ICollection<ColourDto> Colours { get; set; }
     }
 }
